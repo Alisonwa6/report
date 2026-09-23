@@ -16,58 +16,57 @@ struct Employee {
     double gross_pay;
 };
 
-double readEmployeeData(Employee &emp);
+double readEmployeeData(std::vector<Employee> &employees);
 void parseString(std::string &line, std::string &field);
 void printEmpTable(std::vector<Employee> &employees);
+void empRandomize(std::vector<Employee> &employees);
+void sortGrossPay(std::vector<Employee> &employees);
 
 int main() {
     std::vector <Employee> employees;
-    Employee employee;
-    readEmployeeData(employee);
+    readEmployeeData(employees);
+    printEmpTable(employees);
+    empRandomize(employees);
+    printEmpTable(employees);
+    sortGrossPay(employees);
     printEmpTable(employees);
     return 0;
 }
 
-double readEmployeeData(Employee &emp) {
+double readEmployeeData(std::vector<Employee> &employees) {
     std::ifstream file("../EmployeeData.csv");
-    file.open(R"(../EmployeeData.csv)");
+    //file.open("../EmployeeData.csv");
     if (!file.is_open()) {
         std::cout << "Error opening file!" << std::endl;
         return 1;
     }
-    double grossPay;
 
-    std::cout << "------------------------------------------------------------------\n";
-
-    /*std::string empID = std::to_string(employeeID);
-    std::string hr = std::to_string(hourly_rate);
-    std::string wh = std::to_string(weekly_hours);*/
+    std::string empID;
+    std::string hr;
+    std::string wh;
 
     std::string line;
     std::getline(file, line);
     while (std::getline(file, line)) {
+        Employee emp;
         std::stringstream ss(line);
         //std::string nametkn, empID, hr, wh;
 
-        std::cout << std::fixed << std::setprecision(2);
-
-        parseString(line, name);
+        parseString(line, emp.name);
         parseString(line, empID);
         parseString(line, hr);
         parseString(line, wh);
 
-        gross_pay = stod(hr) * stod(wh);
+        emp.employeeID = std::stoi(empID);
+        emp.hourly_rate = std::stod(hr);
+        emp.weekly_hours = std::stod(wh);
 
-        //employees.push_back({name, employeeID, hourly_rate, weekly_hours, gross_pay});
+        emp.gross_pay = emp.hourly_rate * emp.weekly_hours;
 
-        std::cout << std::setw(15) << std::left << name;
-        std::cout << std::setw(15) << std::left << empID;
-        std::cout << std::setw(15) << std::left << hr;
-        std::cout << std::setw(15) << std::left << wh;
-        std::cout << std::setw(15) << std::left << gross_pay;
-        std::cout << std::endl;
+        employees.push_back(emp);
     }
     file.close();
+    return 0;
 }
 
 void parseString(std::string &line, std::string &field) {
@@ -75,4 +74,38 @@ void parseString(std::string &line, std::string &field) {
     location = line.find(',');
     field = line.substr(0, location);
     line = line.substr(location + 1, line.length());
+}
+
+void printEmpTable(std::vector<Employee> &employees) {
+    std::cout << std::fixed << std::setprecision(2);
+
+    std::cout << std::left << std::setw(15) << "NAME";
+    std::cout << std::left << std::setw(15) << "EMPNUMBER";
+    std::cout << std::left << std::setw(15) << "HOURLY RATE";
+    std::cout << std::left << std::setw(15) << "HOURS WORKED";
+    std::cout << std::left << std::setw(15) << "GROSS PAY" << std::endl;
+    std::cout << "----------------------------------------------------------------------" << std::endl;
+
+    for (Employee& emp : employees) {
+        std::cout << std::left << std::setw(17) << emp.name
+        << std::setw(15) << emp.employeeID
+        << "$" << std::setw(15) << emp.hourly_rate
+        << std::setw(13) << emp.weekly_hours
+        << "$" << std::setw(15) << emp.gross_pay << std::endl;
+    }
+    std::cout << std::endl;
+}
+
+void empRandomize(std::vector<Employee> &employees) {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::shuffle(employees.begin(), employees.end(), gen);
+}
+
+void sortGrossPay(std::vector<Employee> &employees) {
+    std::sort(employees.begin(), employees.end(),
+        [](Employee a, Employee b) {
+            return a.gross_pay > b.gross_pay;
+        }
+    );
 }
